@@ -22,6 +22,9 @@ public class GameBase {
 	static JPanel mainPanel = new JPanel();
 	static JPanel numberPanel = new JPanel();
 	static JPanel textPanel = new JPanel();
+	static JPanel newGamePanel = new JPanel();
+	static JPanel scoreLabelPanel = new JPanel();
+	static JPanel textLabelPanel = new JPanel();
 
 	static JLabel scoreLabel = new JLabel();
 	static JLabel textLabel = new JLabel();
@@ -113,26 +116,36 @@ public class GameBase {
 			}
 		}
 		
+		newGame.setPreferredSize(new Dimension(100, 50));
 		newGame.setActionCommand("New Game");
 		newGame.addActionListener(new Buttons());
 		newGame.setBackground(new Color(184, 173, 161));
 		newGame.setForeground(Color.white);
+//		newGame.setBorder(BorderFactory.createEmptyBorder());	
+		newGame.setBorderPainted(false);
+		newGamePanel.add(newGame);
+		newGamePanel.setBackground(new Color(251, 248, 240));
 		
+		scoreLabel.setPreferredSize(new Dimension(100, 50));
 		scoreLabel.setOpaque(true);
 		scoreLabel.setForeground(Color.white);
 		scoreLabel.setBackground((new Color(184, 173, 161)));
 		scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		scoreLabelPanel.add(scoreLabel);
+		scoreLabelPanel.setBackground(new Color(251, 248, 240));
 		
 		textLabel.setBackground(new Color(251, 248, 240));
 		textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		textLabelPanel.add(textLabel);
+		textLabelPanel.setBackground(new Color(251, 248, 240));
 		
-		textPanel.setSize(new Dimension(400, 0));
+		textPanel.setPreferredSize(new Dimension(200, 400));
 		textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		textPanel.setLayout(new GridLayout(3, 1, 10, 10));
 		textPanel.setBackground(new Color(251, 248, 240));
-		textPanel.add(newGame);
-		textPanel.add(scoreLabel);
-		textPanel.add(textLabel);
+		textPanel.add(newGamePanel);
+		textPanel.add(scoreLabelPanel);
+		textPanel.add(textLabelPanel);
 		
 		newGame.setFocusable(false);
 		
@@ -148,7 +161,7 @@ public class GameBase {
 		frame.setSize(600, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(mainPanel);
-//		frame.pack();
+		frame.pack();
 		frame.setVisible(true);
 //		frame.requestFocus();
 	}
@@ -317,6 +330,8 @@ public class GameBase {
 				continue;
 			}
 		}
+		
+		score = 0;
 	}
 	
 	public static boolean changeBoard(int direction) {
