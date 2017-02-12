@@ -1,5 +1,3 @@
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.lang.System;
 import java.util.Random;
 
@@ -24,9 +22,11 @@ public class GameBase {
 	static JPanel mainPanel = new JPanel();
 	static JPanel numberPanel = new JPanel();
 	static JPanel textPanel = new JPanel();
-	
+
 	static JLabel scoreLabel = new JLabel();
 	static JLabel textLabel = new JLabel();
+	
+	static JButton newGame = new JButton("New Game");
 	
 	static JLabel[][] numbers;
 	
@@ -56,29 +56,6 @@ public class GameBase {
 	}
 	
 	public static void GUI() {
-		setLabels();
-		
-		numberPanel.setBackground(new Color(184, 173, 161));
-		numberPanel.setSize(new Dimension(400, 400));
-		numberPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		numberPanel.setLayout(new GridLayout(4, 4, 8, 8));
-		
-		for (int row = 0; row < options[1]; row++) {
-			for (int col = 0; col < options[0]; col++) {
-				numbers[col][row].setOpaque(true);
-				numbers[col][row].setHorizontalAlignment(SwingConstants.CENTER);
-//				numbers[col][row].setMinimumSize(new Dimension(100, 100));
-				numbers[col][row].setPreferredSize(new Dimension(100, 100));
-				numberPanel.add(numbers[col][row]);
-			}
-		}
-		
-		textPanel.setSize(new Dimension(100, 100));
-		textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		textPanel.setBackground(new Color(188, 173, 161));
-		textPanel.add(scoreLabel);
-		textPanel.add(textLabel);
-		
 		KeyListener listener = new KeyListener() {
 			@Override
 			public void keyPressed(KeyEvent event) {
@@ -108,7 +85,7 @@ public class GameBase {
 				}
 				
 				if (terminalBoard()) {
-					textLabel.setText("You lose!");
+					textLabel.setText("Game Over!");
 				}
 			}
 			
@@ -119,18 +96,68 @@ public class GameBase {
 			}
 		};
 		
-		mainPanel.setSize(500, 500);
+		setLabels();
+		
+		numberPanel.setBackground(new Color(184, 173, 161));
+		numberPanel.setSize(new Dimension(400, 400));
+		numberPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+		numberPanel.setLayout(new GridLayout(4, 4, 8, 8));
+		
+		for (int row = 0; row < options[1]; row++) {
+			for (int col = 0; col < options[0]; col++) {
+				numbers[col][row].setOpaque(true);
+				numbers[col][row].setHorizontalAlignment(SwingConstants.CENTER);
+//				numbers[col][row].setMinimumSize(new Dimension(100, 100));
+				numbers[col][row].setPreferredSize(new Dimension(100, 100));
+				numberPanel.add(numbers[col][row]);
+			}
+		}
+		
+		newGame.setActionCommand("New Game");
+		newGame.addActionListener(new Buttons());
+		newGame.setBackground(new Color(184, 173, 161));
+		newGame.setForeground(Color.white);
+		
+		scoreLabel.setOpaque(true);
+		scoreLabel.setForeground(Color.white);
+		scoreLabel.setBackground((new Color(184, 173, 161)));
+		scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		textLabel.setBackground(new Color(251, 248, 240));
+		textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		textPanel.setSize(new Dimension(400, 0));
+		textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		textPanel.setLayout(new GridLayout(3, 1, 10, 10));
+		textPanel.setBackground(new Color(251, 248, 240));
+		textPanel.add(newGame);
+		textPanel.add(scoreLabel);
+		textPanel.add(textLabel);
+		
+		newGame.setFocusable(false);
+		
+		mainPanel.setSize(600, 600);
 		mainPanel.setBackground(new Color(251, 248, 240));
 //		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		mainPanel.setLayout(new FlowLayout());
+		mainPanel.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		mainPanel.add(textPanel);
 		mainPanel.add(numberPanel);
 		
 		frame.addKeyListener(listener);
-		frame.setSize(500, 500);
+		frame.setSize(600, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(mainPanel);
-		frame.pack();
+//		frame.pack();
 		frame.setVisible(true);
+//		frame.requestFocus();
+	}
+	
+	private static class Buttons implements ActionListener {
+		public void actionPerformed(ActionEvent event) {
+			resetBoard();
+			setLabels();
+		}
 	}
 	
 	public static void setLabels() {
@@ -160,7 +187,7 @@ public class GameBase {
 				}
 				
 				switch ((int) board[col][row]) {
-					case 0:
+					case 0: //No tile
 						numbers[col][row].setBackground(new Color(206, 192, 180));
 						break;
 					case 1: //2
@@ -196,7 +223,7 @@ public class GameBase {
 					case 11: //2048
 						numbers[col][row].setBackground(new Color(240, 193, 47));
 						break;
-					default:
+					default: //Higher than 2048
 						numbers[col][row].setBackground(new Color(61, 57, 52));
 						break;
 				}
@@ -204,9 +231,6 @@ public class GameBase {
 		}
 		
 		scoreLabel.setText("Score: " + Integer.toString(score));
-		scoreLabel.setOpaque(true);
-		scoreLabel.setForeground(Color.white);
-		scoreLabel.setBackground((new Color(188, 173, 161)));
 	}
 	
 	public static void playGame() {
