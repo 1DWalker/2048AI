@@ -20,14 +20,14 @@ public class NeuralNetwork {
 	
 	static double weightChange = 1.0 / 5;
 	
-	public static int manager(byte[][] board) {
+	public static int manager(byte[][] board, int[] options) {
 		if (weights == false) {
 			readWeights();
 			weights = true;
 		}
 		
 //		return randomNum.nextInt(4);
-		return chooseDirection(board);
+		return chooseDirection(board, options);
 	}
 	
 	public static void resetWeights() {
@@ -75,7 +75,7 @@ public class NeuralNetwork {
 		weightChange = weightChange / 2.0;
 	}
 	
-	public static int chooseDirection(byte[][] board) {
+	public static int chooseDirection(byte[][] board, int[] options) {
 		//SIGMOID ACTIVATION FUNCTION
 		
 		//Standardize input layer
@@ -143,32 +143,44 @@ public class NeuralNetwork {
 			nodesOutput[i] = nodesOutput[i] / sum;
 		}
 		
-		while (true) {
-			int bestDirection = -1;
-//			double bestScore = -1;
-//			for (int i = 0; i < 4; i++) {
-//				if (nodesOutput[i] > bestScore) {
-//					bestScore = nodesOutput[i];
-//					bestDirection = i;
-//				}
-//			}
-			
-			double probability = randomNum.nextDouble();
-			for (int i = 0; i < 4; i++) {
-				if (nodesOutput[i] > probability) {
-					bestDirection = i;
-					break;
+		if (options[6] == 1) {
+			while (true) {
+				int bestDirection = -1;
+				
+				double probability = randomNum.nextDouble();
+				for (int i = 0; i < 4; i++) {
+					if (nodesOutput[i] > probability) {
+						bestDirection = i;
+						break;
+					} else {
+						probability -= nodesOutput[i];
+					}
+				}
+				
+				if (terminal(board, bestDirection)) {
+					continue;
 				} else {
-					probability -= nodesOutput[i];
+					return bestDirection;
 				}
 			}
-			
-			if (terminal(board, bestDirection)) {
-//				nodesOutput[bestDirection] = -1;
-				continue;
-			} else {
-				return bestDirection;
-			}
+		} else {
+			while (true) {
+				int bestDirection = -1;
+				double bestScore = -1;
+				for (int i = 0; i < 4; i++) {
+					if (nodesOutput[i] > bestScore) {
+						bestScore = nodesOutput[i];
+						bestDirection = i;
+					}
+				}
+						
+				if (terminal(board, bestDirection)) {
+					nodesOutput[bestDirection] = -1;
+					continue;
+				} else {
+					return bestDirection;
+				}
+			}	
 		}
 	}
 	
