@@ -26,11 +26,13 @@ public class GameBase {
 	static JPanel newGamePanel = new JPanel();
 	static JPanel scoreLabelPanel = new JPanel();
 	static JPanel textLabelPanel = new JPanel();
+	static JPanel hintPanel = new JPanel();
 
 	static JLabel scoreLabel = new JLabel();
 	static JLabel textLabel = new JLabel();
 	
 	static JButton newGame = new JButton("New Game");
+	static JButton hintButton = new JButton("AI Hint!");
 	
 	static JLabel[][] numbers;
 	
@@ -44,7 +46,7 @@ public class GameBase {
 		//Console output
 		options[3] = 0;
 		//Number of AI games
-		options[4] = 5000;
+		options[4] = 300;
 		//Write into file
 		options[5] = 1;
 		//Train!
@@ -118,6 +120,8 @@ public class GameBase {
 						break;
 				}
 				
+				textLabel.setText("");
+				
 				if (terminalBoard()) {
 					textLabel.setText("Game Over!");
 				}
@@ -170,15 +174,26 @@ public class GameBase {
 		textLabelPanel.add(textLabel);
 		textLabelPanel.setBackground(new Color(251, 248, 240));
 		
+		hintButton.setPreferredSize(new Dimension(100, 50));
+		hintButton.setActionCommand("Hint");
+	 	hintButton.addActionListener(new Buttons());
+		hintButton.setBackground(new Color(184, 173, 161));
+		hintButton.setForeground(Color.white);
+		hintButton.setBorderPainted(false);
+		hintPanel.add(hintButton);
+		hintPanel.setBackground(new Color(251, 248, 240));
+		
 		textPanel.setPreferredSize(new Dimension(200, 400));
 		textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		textPanel.setLayout(new GridLayout(3, 1, 10, 10));
+		textPanel.setLayout(new GridLayout(4, 1, 10, 10));
 		textPanel.setBackground(new Color(251, 248, 240));
 		textPanel.add(newGamePanel);
 		textPanel.add(scoreLabelPanel);
+		textPanel.add(hintPanel);
 		textPanel.add(textLabelPanel);
 		
 		newGame.setFocusable(false);
+		hintButton.setFocusable(false);
 		
 		mainPanel.setSize(600, 600);
 		mainPanel.setBackground(new Color(251, 248, 240));
@@ -199,9 +214,26 @@ public class GameBase {
 	
 	private static class Buttons implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
-			resetBoard();
-			setLabels();
-			textLabel.setText("");
+			String eventName = event.getActionCommand();
+			
+			if (eventName.equals("New Game")) {
+				resetBoard();
+				setLabels();
+				textLabel.setText("");
+			} else if (eventName.equals("Hint")) {
+				switch (NeuralNetwork.chooseDirection(board, options)) {
+					case 0:
+						textLabel.setText("Up");
+						break;
+					case 1: 
+						textLabel.setText("Left");
+						break;
+					case 2:
+						textLabel.setText("Down");
+					case 3:
+						textLabel.setText("Right");
+				}
+			}
 		}
 	}
 	
@@ -285,7 +317,7 @@ public class GameBase {
 		if (options[3] == 1) System.out.println();
 		
 		while (!terminalBoard()) {
-			changeBoard(NeuralNetwork.manager(board));
+			changeBoard(NeuralNetwork.manager(board, options));
 			if (options[3] == 1) printBoard();
 			if (options[3] == 1) System.out.println();
 		}
@@ -585,5 +617,4 @@ public class GameBase {
 	}
 
 }
-
 
