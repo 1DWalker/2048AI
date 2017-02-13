@@ -1,5 +1,4 @@
 import java.util.Random;
-import java.util.Scanner;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,23 +7,21 @@ import java.io.IOException;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
-import java.lang.StringBuilder;
 
 public class NeuralNetwork {
 	static Random randomNum = new Random();
 	
 	static double highScore = 0;
 	
-	static double[][] inputWeightsHL1 = new double[16][16];
-	static double[][] inputWeightsHL2 = new double[16][16];
-	static double[][] inputWeightsOutput = new double[16][4];
+	static double[][] inputWeightsHL1 = new double[16][64];
+	static double[][] inputWeightsHL2 = new double[64][64];
+	static double[][] inputWeightsOutput = new double[64][4];
 	static boolean weights = false;
 	
 	static double weightChange = 1.0 / 5;
 	
 	public static int manager(byte[][] board) {
 		if (weights == false) {
-//			resetWeights();
 			readWeights();
 			weights = true;
 		}
@@ -100,7 +97,7 @@ public class NeuralNetwork {
 		}
 		
 		//1st hidden layer
-		double[] nodesHL1 = new double[16];
+		double[] nodesHL1 = new double[64];
 		for (int node = 0; node < nodesHL1.length; node++) {
 			//Weighted sum
 			double sum = 0;
@@ -112,11 +109,11 @@ public class NeuralNetwork {
 		}
 		
 		//2nd hidden layer
-		double[] nodesHL2 = new double[16];
+		double[] nodesHL2 = new double[64];
 		for (int node = 0; node < nodesHL1.length; node++) {
 			//Weighted sum
 			double sum = 0;
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < 64; i++) {
 				sum += nodesHL1[i] * inputWeightsHL2[i][node];
 			}
 			
@@ -128,7 +125,7 @@ public class NeuralNetwork {
 		for (int node = 0; node < nodesOutput.length; node++) {
 			//Weighted sum
 			double sum = 0;
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < 64; i++) {
 				sum += nodesHL2[i] * inputWeightsOutput[i][node];
 			}
 			
@@ -307,20 +304,3 @@ public class NeuralNetwork {
 		} 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
