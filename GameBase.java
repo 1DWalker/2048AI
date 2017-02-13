@@ -42,15 +42,15 @@ public class GameBase {
 		//Height of game
 		options[1] = 4; 
 		//GUI Mode
-		options[2] = 0;
+		options[2] = 1;
 		//Console output
 		options[3] = 0;
 		//Number of AI games
 		options[4] = 300;
 		//Write into file
-		options[5] = 1;
+		options[5] = 0;
 		//Train!
-		options[6] = 1;
+		options[6] = 0;
 		
 		numbers = new JLabel[options[0]][options[1]];
 		
@@ -97,30 +97,54 @@ public class GameBase {
 			public void keyPressed(KeyEvent event) {
 				int keyCode = event.getKeyCode();
 				
-				switch (keyCode) {
+				if (!terminalBoard()) {
+					switch (keyCode) {
 					case KeyEvent.VK_UP:
 						changeBoard(0);
 						setLabels();
 						totalScore += score;
+						textLabel.setText("");
 						break;
 					case KeyEvent.VK_LEFT: 
 						changeBoard(1);
 						setLabels();
 						totalScore += score;
+						textLabel.setText("");
 						break;
 					case KeyEvent.VK_DOWN:
 						changeBoard(2);
 						setLabels();
 						totalScore += score;
+						textLabel.setText("");
 						break;
 					case KeyEvent.VK_RIGHT:
 						changeBoard(3);
 						setLabels();
 						totalScore += score;
+						textLabel.setText("");
 						break;
+					default: //Next AI move
+						int direction = NeuralNetwork.chooseDirection(board, options);
+						changeBoard(direction);
+						switch (direction) {
+							case 0:
+								textLabel.setText("Up");
+								break;
+							case 1: 
+								textLabel.setText("Left");
+								break;
+							case 2:
+								textLabel.setText("Down");
+								break;
+							case 3:
+								textLabel.setText("Right");
+								break;
+						}
+						setLabels();
+						totalScore += score;
+						break;
+					}
 				}
-				
-				textLabel.setText("");
 				
 				if (terminalBoard()) {
 					textLabel.setText("Game Over!");
@@ -230,8 +254,10 @@ public class GameBase {
 						break;
 					case 2:
 						textLabel.setText("Down");
+						break;
 					case 3:
 						textLabel.setText("Right");
+						break;
 				}
 			}
 		}
@@ -617,4 +643,3 @@ public class GameBase {
 	}
 
 }
-
