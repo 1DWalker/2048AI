@@ -1,4 +1,3 @@
-import java.lang.System;
 import java.util.Random;
 
 import java.awt.*;
@@ -9,13 +8,15 @@ public class GameBase {
 	
 	static Random randomNum = new Random();
 	
-	static int[] options = new int[3];
+	static int[] options = new int[7];
 	
 	static byte[][] board = new byte[4][4];
 	
 	static int score = 0;
 	
 	static long totalScore = 0;
+	static double highestScore = 0;
+	static long highestTile = 0;
 	static long trials = 0;
 	
 	static JFrame frame = new JFrame("2048");
@@ -38,8 +39,16 @@ public class GameBase {
 		options[0] = 4;
 		//Height of game
 		options[1] = 4; 
-		//OutputGUI
-		options[2] = 1;
+		//GUI Mode
+		options[2] = 0;
+		//Console output
+		options[3] = 0;
+		//Number of AI games
+		options[4] = 5000;
+		//Write into file
+		options[5] = 1;
+		//Train!
+		options[6] = 1;
 		
 		numbers = new JLabel[options[0]][options[1]];
 		
@@ -54,7 +63,29 @@ public class GameBase {
 		if (options[2] == 1) {
 			GUI();
 		} else {
-			//Auto-play games
+			for (int sets = 0; sets < 7000; sets++) {
+				if (sets % 1000 == 0 & sets != 0) {
+					NeuralNetwork.decreaseWeightChange();
+				}
+				
+				totalScore = 0;
+				trials = 0;
+				
+				for (int i = 0; i < options[4]; i++) {
+					playGame();
+				}
+				
+				if ((double) totalScore / trials > highestScore) {
+					if (options[5] == 1) {
+						NeuralNetwork.writeWeights();
+					}
+					highestScore = (double) totalScore / trials;
+				} else { //keep old weights
+					if (options[6] == 1) NeuralNetwork.readWeights();
+				}
+				System.out.println("Average score = " + Math.round(10 * (double) totalScore / trials) / 10.0 + " 		Highest average score: " + Math.round(10 * highestScore) / 10.0 + " 	Largest Tile: " + highestTile + " 		" + (sets + 1)); 
+				if (options[6] == 1) NeuralNetwork.changeWeights();
+			}
 		}
 	}
 	
@@ -170,6 +201,7 @@ public class GameBase {
 		public void actionPerformed(ActionEvent event) {
 			resetBoard();
 			setLabels();
+			textLabel.setText("");
 		}
 	}
 	
@@ -249,35 +281,31 @@ public class GameBase {
 	public static void playGame() {
 		resetBoard();
 		score = 0;
-		if (options[2] == 1) printBoard();
-		if (options[2] == 1) System.out.println();
+		if (options[3] == 1) printBoard();
+		if (options[3] == 1) System.out.println();
 		
 		while (!terminalBoard()) {
-			Random randomNum = new Random();
-			int direction = randomNum.nextInt(4);
-			String[] directionList = {"Up", "Left", "Down", "Right"};
-			if (options[2] == 1) System.out.println(directionList[direction]);
-			changeBoard(direction);
-			if (options[2] == 1) printBoard();
-			if (options[2] == 1) System.out.println();
-			//break;
+			changeBoard(NeuralNetwork.manager(board));
+			if (options[3] == 1) printBoard();
+			if (options[3] == 1) System.out.println();
 		}
 		
+//		if (options[3] == 0) printBoard();
+		if (options[3] == 1) System.out.println("Score: " + score);
 		
+		int largestValue = 0;
+		for (int row = 0; row < options[1]; row++) {
+			for (int col = 0; col < options[0]; col++) {
+				if (Math.pow(2, board[col][row]) > largestValue) {
+					largestValue = (int) Math.pow(2, board[col][row]);
+				}
+			}
+		}
 		
-//		System.out.println(score);
-//		
-//		int largestValue = 0;
-//		for (int row = 0; row < options[1]; row++) {
-//			for (int col = 0; col < options[0]; col++) {
-//				if (Math.pow(2, board[col][row]) > largestValue) {
-//					largestValue = (int) Math.pow(2, board[col][row]);
-//				}
-//			}
-//		}
-//		System.out.println("Largest tile: " + largestValue);
-//		totalScore += score;
-//		trials++;
+		if (largestValue > highestTile) highestTile = largestValue;
+		if (options[3] == 1) System.out.println("Largest tile: " + largestValue);
+		totalScore += score;
+		trials++;
 	}
 	
 	public static void printBoard() {
@@ -295,7 +323,7 @@ public class GameBase {
 		for (int row = 0; row < options[0]; row++) {
 			for (int col = 0; col < options[1]; col++) {
 				if (board[col][row] == 0) {
-					for (int i = 0; i < Math.log10(largestValue) + 1; i++) {
+					for (int i = 0; i < (int) Math.log10(largestValue); i++) {
 						System.out.print(" ");
 					}
 				} else {
@@ -304,7 +332,11 @@ public class GameBase {
 					}
 				}
 				
-				System.out.print((int) Math.pow(2, board[col][row]) + " ");
+				if (board[col][row] != 0) {
+					System.out.print((int) Math.pow(2, board[col][row]) + " ");
+				} else {
+					System.out.print("0 ");
+				}
 			}
 			
 			System.out.println();
