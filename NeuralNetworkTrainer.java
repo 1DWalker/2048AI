@@ -14,21 +14,25 @@ public class NeuralNetworkTrainer {
 	static double highScore = 0;
 	
 	static double bias = 1;
-	static double[][] inputWeightsHL1 = new double[17][2];
-	static double[][] inputWeightsHL2 = new double[2][2];
-	static double[][] inputWeightsHL3 = new double[2][2];
-	static double[][] inputWeightsOutput = new double[2][4];
+	static double[][] inputWeightsHL1 = new double[17][8];
+	static double[][] inputWeightsHL2 = new double[8][8];
+	static double[][] inputWeightsHL3 = new double[8][8];
+	static double[][] inputWeightsOutput = new double[8][4];
 	
 	//Reinforement learning. CE stands for characteristic elegibility
-	static double[][] CEinputWeightsHL1 = new double[17][2];
-	static double[][] CEinputWeightsHL2 = new double[2][2];
-	static double[][] CEinputWeightsHL3 = new double[2][2];
-	static double[][] CEinputWeightsOutput = new double[2][4];
+	static double[][] CEinputWeightsHL1 = new double[17][8];
+	static double[][] CEinputWeightsHL2 = new double[8][8];
+	static double[][] CEinputWeightsHL3 = new double[8][8];
+	static double[][] CEinputWeightsOutput = new double[8][4];
 	
+	static double[] nodesHL1Random = new double[8];
+	static double[] nodesHL2Random = new double[8];
+	static double[] nodesHL3Random = new double[8];
+	static double[] nodesOutputRandom = new double[8];
 	
-	static double learningRateInput = 0.0000000001;
-	static double learningRateHidden = 0.0000000001;
-	static double learningRateOutput = 0.0000000001;
+	static double learningRateInput = 0.000000005;
+	static double learningRateHidden = 0.000000005;
+	static double learningRateOutput = 0.000000005;
 	
 	static double baseline = 0;
 	
@@ -78,7 +82,6 @@ public class NeuralNetworkTrainer {
 		
 		for (int i = 0; i < inputWeightsHL1.length; i++) {
 			for (int k = 0; k < inputWeightsHL1[0].length; k++) {
-//				System.out.println( learningRate * (reinforcementValue - baseline) * CEinputWeightsHL1[i][k]);
 				inputWeightsHL1[i][k] += learningRateInput * (reinforcementValue - baseline) * CEinputWeightsHL1[i][k];
 //				System.out.println(learningRateInput * (reinforcementValue - baseline) * CEinputWeightsHL1[i][k]);
 				averageChange += learningRateInput * (reinforcementValue - baseline) * CEinputWeightsHL1[i][k];
@@ -99,6 +102,7 @@ public class NeuralNetworkTrainer {
 			for (int k = 0; k < inputWeightsHL3[0].length; k++) {
 				inputWeightsHL3[i][k] += learningRateHidden * (reinforcementValue - baseline) * CEinputWeightsHL3[i][k];
 				averageChange += learningRateHidden * (reinforcementValue - baseline) * CEinputWeightsHL3[i][k];
+//				System.out.println(learningRateHidden * (reinforcementValue - baseline) * CEinputWeightsHL3[i][k]);
 			}
 		}
 		
@@ -107,14 +111,16 @@ public class NeuralNetworkTrainer {
 //				System.out.println(inputWeightsOutput[i][k] + "   " + (learningRate * (reinforcementValue - baseline) * CEinputWeightsOutput[i][k]));
 				inputWeightsOutput[i][k] += learningRateOutput * (reinforcementValue - baseline) * CEinputWeightsOutput[i][k];
 				averageChange += learningRateOutput * (reinforcementValue - baseline) * CEinputWeightsOutput[i][k];
+//				System.out.println(learningRateOutput * (reinforcementValue - baseline) * CEinputWeightsOutput[i][k]);
 			}
 		}
 		
 		System.out.println("Summed weight change: " + averageChange);
 		System.out.println();
 		numberOfChanges++;
+//		System.exit(1);
 		
-//		baseline = 0.01 * reinforcementValue + (1 - 0.01) * baseline;
+//		baseline = 0.11 * reinforcementValue + (1 - 0.11) * baseline;
 		
 		if (numberOfChanges % 1000000 == 0) {
 			learningRateInput /= 2.0;
@@ -125,10 +131,10 @@ public class NeuralNetworkTrainer {
 	}
 		
 	public static int chooseDirection(byte[][] board, int[] options) {
+		randomizeNodes();
 		//SIGMOID ACTIVATION FUNCTION 1(1+e^-x)
 		
 		double bestOutput = 0;
-		double randomAddition = 0;
 		
 		//Standardize input layer
 		
@@ -152,10 +158,8 @@ public class NeuralNetworkTrainer {
 				sum += nodesInput[i] * inputWeightsHL1[i][node];
 			}
 			
-			randomAddition = randomDistribution() / 5;
 			bestOutput = 1 / (1 + Math.exp(-sum));
-//			nodesHL1[node] = 1 / (1 + Math.exp(-sum)) + randomAddition;
-			nodesHL1[node] = 1 / (1 + Math.exp(-sum + randomAddition));
+			nodesHL1[node] = 1 / (1 + Math.exp(-sum + nodesHL1Random[node]));
 			
 			for (int i = 0; i < nodesInput.length; i++) {
 				CEinputWeightsHL1[i][node] += (nodesHL1[node] - bestOutput) * nodesInput[i];
@@ -171,10 +175,8 @@ public class NeuralNetworkTrainer {
 				sum += nodesHL1[i] * inputWeightsHL2[i][node];
 			}
 			
-			randomAddition = randomDistribution() / 5;
 			bestOutput = 1 / (1 + Math.exp(-sum));
-//			nodesHL2[node] = 1 / (1 + Math.exp(-sum)) + randomAddition;
-			nodesHL2[node] = 1 / (1 + Math.exp(-sum + randomAddition));
+			nodesHL2[node] = 1 / (1 + Math.exp(-sum + nodesHL2Random[node]));
 
 			
 			for (int i = 0; i < nodesHL1.length; i++) {
@@ -191,10 +193,8 @@ public class NeuralNetworkTrainer {
 				sum += nodesHL2[i] * inputWeightsHL3[i][node];
 			}
 			
-			randomAddition = randomDistribution() / 5;
 			bestOutput = 1 / (1 + Math.exp(-sum));
-//			nodesHL3[node] = 1 / (1 + Math.exp(-sum)) + randomAddition;
-			nodesHL3[node] = 1 / (1 + Math.exp(-sum + randomAddition));
+			nodesHL3[node] = 1 / (1 + Math.exp(-sum + nodesHL3Random[node]));
 
 			
 			for (int i = 0; i < nodesHL2.length; i++) {
@@ -211,10 +211,8 @@ public class NeuralNetworkTrainer {
 				sum += nodesHL3[i] * inputWeightsOutput[i][node];
 			}
 			
-			randomAddition = randomDistribution() / 5;
 			bestOutput = 1 / (1 + Math.exp(-sum));
-//			nodesOutput[node] = 1 / (1 + Math.exp(-sum)) + randomAddition;
-			nodesOutput[node] = 1 / (1 + Math.exp(-sum + randomAddition));
+			nodesOutput[node] = 1 / (1 + Math.exp(-sum + nodesOutputRandom[node]));
 			
 			for (int i = 0; i < nodesHL3.length; i++) {
 				CEinputWeightsOutput[i][node] += (nodesOutput[node] - bestOutput) * nodesHL3[i];
@@ -281,6 +279,24 @@ public class NeuralNetworkTrainer {
 	
 	public static double randomDistribution() {
 		return randomNum.nextGaussian();
+	}
+	
+	public static void randomizeNodes() {
+		for (int i = 0; i < nodesHL1Random.length; i++) {
+			nodesHL1Random[i] = randomDistribution() / 20;
+		}
+		
+		for (int i = 0; i < nodesHL2Random.length; i++) {
+			nodesHL2Random[i] = randomDistribution() / 15;
+		}
+		
+		for (int i = 0; i < nodesHL3Random.length; i++) {
+			nodesHL3Random[i] = randomDistribution() / 15;
+		}
+		
+		for (int i = 0; i < nodesOutputRandom.length; i++) {
+			nodesOutputRandom[i] = randomDistribution() / 10;
+		}
 	}
 	
 	public static boolean terminal(byte board[][], int direction) {
